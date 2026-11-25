@@ -12,13 +12,13 @@ export function Layout() {
   }, [theme]);
 
   return (
-    <div className="app-shell">
+    <div className="app">
       <Sidebar />
-      <div className="main-area">
+      <div className="main-content">
         <Topbar />
-        <div className="content">
+        <main className="content">
           <Outlet />
-        </div>
+        </main>
       </div>
     </div>
   );
