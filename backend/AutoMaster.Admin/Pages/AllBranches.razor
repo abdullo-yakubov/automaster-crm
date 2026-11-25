@@ -1,0 +1,33 @@
+@page "/branches"
+@inject ApiService Api
+@inject AuthService Auth
+@inject NavigationManager Nav
+
+<h2>Филиалы сети</h2>
+
+<div class="card">
+    <DataGrid Items="Branches" TItem="BranchItem">
+        <HeaderRow>
+            <th>Название</th><th>Адрес</th><th>Тип</th><th>Заказов</th><th>Выручка</th><th>NPS</th><th>Статус</th>
+        </HeaderRow>
+        <RowTemplate Context="b">
+            <td>@b.Name</td>
+            <td>@b.Address</td>
+            <td>@b.Type</td>
+            <td>@b.OrdersCount</td>
+            <td>@b.Revenue.ToString("N0") TJS</td>
+            <td>@b.Nps.ToString("N0")</td>
+            <td>@(b.IsActive ? "Активен" : "Неактивен")</td>
+        </RowTemplate>
+    </DataGrid>
+</div>
+
+@code {
+    private List<BranchItem> Branches = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Auth.CurrentUser is null) { Nav.NavigateTo("/login"); return; }
+        Branches = await Api.GetAsync<List<BranchItem>>("branches") ?? new();
+    }
+}

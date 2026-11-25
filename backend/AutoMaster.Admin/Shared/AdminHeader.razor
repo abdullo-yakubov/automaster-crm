@@ -1,0 +1,22 @@
+@using AutoMaster.Admin.Services
+@inject AuthService Auth
+@inject NavigationManager Nav
+
+<header class="admin-header">
+    <div></div>
+    @if (Auth.CurrentUser is not null)
+    {
+        <div class="admin-user">
+            <span>@Auth.CurrentUser.FullName (@Auth.CurrentUser.Role)</span>
+            <button class="btn btn-secondary" @onclick="HandleLogout">Выйти</button>
+        </div>
+    }
+</header>
+
+@code {
+    private async Task HandleLogout()
+    {
+        await Auth.LogoutAsync();
+        Nav.NavigateTo("/login");
+    }
+}

@@ -1,0 +1,76 @@
+@page "/users"
+@inject ApiService Api
+@inject AuthService Auth
+@inject NavigationManager Nav
+
+<h2>Пользователи</h2>
+
+<button class="btn" @onclick="() => ShowModal(null)">+ Пользователь</button>
+
+<div class="card" style="margin-top:16px;">
+    <DataGrid Items="UserList" TItem="AdminUser">
+        <HeaderRow>
+            <th>Имя</th><th>Email</th><th>Роль</th><th>Телефон</th><th>Статус</th><th>Действия</th>
+        </HeaderRow>
+        <RowTemplate Context="u">
+            <td>@u.FullName</td>
+            <td>@u.Email</td>
+            <td>@u.Role</td>
+            <td>@u.Phone</td>
+            <td>@(u.IsActive ? "Активен" : "Заблокирован")</td>
+            <td>
+                <button class="btn btn-secondary" @onclick="() => ShowModal(u)">Изменить</button>
+                <button class="btn btn-secondary" @onclick="() => ToggleBlock(u)">@(u.IsActive ? "Заблокировать" : "Разблокировать")</button>
+            </td>
+        </RowTemplate>
+    </DataGrid>
+</div>
+
+@if (ModalOpen)
+{
+    <UserModal Existing="Editing" OnCreate="HandleCreate" OnUpdate="HandleUpdate" OnCancel="() => ModalOpen = false" />
+}
+
+@code {
+    private List<AdminUser> UserList = new();
+    private bool ModalOpen;
+    private AdminUser? Editing;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Auth.CurrentUser is null) { Nav.NavigateTo("/login"); return; }
+        await Load();
+    }
+
+    private async Task Load()
+    {
+        UserList = await Api.GetAsync<List<AdminUser>>("admin/users") ?? new();
+    }
+
+    private void ShowModal(AdminUser? user)
+    {
+        Editing = user;
+        ModalOpen = true;
+    }
+
+    private async Task HandleCreate(CreateAdminUserRequest req)
+    {
+        await Api.PostAsync<AdminUser>("admin/users", req);
+        ModalOpen = false;
+        await Load();
+    }
+
+    private async Task HandleUpdate(UpdateAdminUserRequest req)
+    {
+        if (Editing is null) return;
+        await Api.PutAsync<AdminUser>($"admin/users/{Editing.Id}", req);
+        ModalOpen = false;
+        await Load();
+    }
+
+    private async Task ToggleBlock(AdminUser user)
+    {
+        await Api.PatchAsync<AdminUser>($"admin/users/{user.Id}/block");
+        await Load();
+    }
+}

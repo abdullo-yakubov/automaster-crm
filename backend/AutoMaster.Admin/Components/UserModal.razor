@@ -1,0 +1,75 @@
+@using AutoMaster.Admin.Models
+
+<div class="modal-backdrop" @onclick="Cancel">
+    <div class="modal" @onclick:stopPropagation="true">
+        <h3>@(IsEdit ? "Редактировать пользователя" : "Новый пользователь")</h3>
+        <div class="field"><label>Email</label><input @bind="Email" disabled="@IsEdit" /></div>
+        @if (!IsEdit)
+        {
+            <div class="field"><label>Пароль</label><input type="password" @bind="Password" /></div>
+        }
+        <div class="field"><label>Имя</label><input @bind="FullName" /></div>
+        <div class="field"><label>Роль</label>
+            <select @bind="Role">
+                <option value="Admin">Admin</option>
+                <option value="Manager">Manager</option>
+                <option value="Mechanic">Mechanic</option>
+                <option value="Accountant">Accountant</option>
+                <option value="Client">Client</option>
+            </select>
+        </div>
+        <div class="field"><label>Телефон</label><input @bind="Phone" /></div>
+        @if (!string.IsNullOrEmpty(Error))
+        {
+            <div class="error-text">@Error</div>
+        }
+        <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:12px;">
+            <button class="btn btn-secondary" @onclick="Cancel">Отмена</button>
+            <button class="btn" @onclick="Submit">Сохранить</button>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public AdminUser? Existing { get; set; }
+    [Parameter] public EventCallback<CreateAdminUserRequest> OnCreate { get; set; }
+    [Parameter] public EventCallback<UpdateAdminUserRequest> OnUpdate { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+
+    private bool IsEdit => Existing is not null;
+    private string Email = "";
+    private string Password = "";
+    private string FullName = "";
+    private string Role = "Manager";
+    private string? Phone;
+    private string? Error;
+
+    protected override void OnParametersSet()
+    {
+        if (Existing is not null)
+        {
+            Email = Existing.Email;
+            FullName = Existing.FullName;
+            Role = Existing.Role;
+            Phone = Existing.Phone;
+        }
+    }
+
+    private async Task Submit()
+    {
+        Error = null;
+        if (string.IsNullOrWhiteSpace(FullName)) { Error = "Имя обязательно"; return; }
+
+        if (IsEdit)
+        {
+            await OnUpdate.InvokeAsync(new UpdateAdminUserRequest(FullName, Role, Phone));
+        }
+        else
+        {
+            if (string.IsNullOrWhiteSpace(Email) || Password.Length < 8) { Error = "Email обязателен, пароль ≥ 8 символов"; return; }
+            await OnCreate.InvokeAsync(new CreateAdminUserRequest(Email, Password, FullName, Role, Phone));
+        }
+    }
+
+    private Task Cancel() => OnCancel.InvokeAsync();
+}

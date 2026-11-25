@@ -1,0 +1,34 @@
+@page "/orders"
+@inject ApiService Api
+@inject AuthService Auth
+@inject NavigationManager Nav
+
+<h2>Все заказы</h2>
+
+<div class="card">
+    <DataGrid Items="Orders" TItem="OrderItem">
+        <HeaderRow>
+            <th>№</th><th>Клиент</th><th>Авто</th><th>Гос. номер</th><th>Статус</th><th>Сумма</th><th>Дата</th>
+        </HeaderRow>
+        <RowTemplate Context="o">
+            <td>@o.OrderNumber</td>
+            <td>@o.CustomerName</td>
+            <td>@o.VehicleMakeModel</td>
+            <td>@o.LicensePlate</td>
+            <td>@o.Status</td>
+            <td>@o.TotalCost.ToString("N0") TJS</td>
+            <td>@o.CreatedAt.ToString("dd.MM.yyyy")</td>
+        </RowTemplate>
+    </DataGrid>
+</div>
+
+@code {
+    private List<OrderItem> Orders = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Auth.CurrentUser is null) { Nav.NavigateTo("/login"); return; }
+        var result = await Api.GetAsync<PagedResult<OrderItem>>("admin/orders?limit=100");
+        Orders = result?.Items ?? new();
+    }
+}

@@ -1,0 +1,48 @@
+@page "/settings"
+@inject ApiService Api
+@inject AuthService Auth
+@inject NavigationManager Nav
+
+<h2>Настройки системы</h2>
+
+@if (Config is not null)
+{
+    <div class="card">
+        <div class="field"><label>Название сервиса</label><input @bind="Config.ServiceName" /></div>
+        <div class="field"><label>Адрес</label><input @bind="Config.Address" /></div>
+        <div class="field"><label>Телефон</label><input @bind="Config.Phone" /></div>
+        <button class="btn" @onclick="Save">Сохранить</button>
+    </div>
+}
+
+<div class="card" style="margin-top:16px;">
+    <h3>Системные действия</h3>
+    <button class="btn btn-secondary" @onclick="() => ConfirmOpen = true">Сбросить демо-данные</button>
+</div>
+
+<ConfirmDialog IsOpen="ConfirmOpen" Title="Сбросить демо-данные?"
+               Message="Все текущие заказы, клиенты и транзакции будут удалены и заменены демо-набором. Действие необратимо."
+               OnConfirm="ResetDemo" OnCancel="() => ConfirmOpen = false" />
+
+@code {
+    private AppConfigModel? Config;
+    private bool ConfirmOpen;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Auth.CurrentUser is null) { Nav.NavigateTo("/login"); return; }
+        Config = await Api.GetAsync<AppConfigModel>("settings");
+    }
+
+    private async Task Save()
+    {
+        if (Config is null) return;
+        await Api.PutAsync<AppConfigModel>("settings", Config);
+    }
+
+    private async Task ResetDemo()
+    {
+        ConfirmOpen = false;
+        await Api.PostAsync("admin/reset-demo");
+    }
+}

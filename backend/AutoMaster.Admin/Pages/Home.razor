@@ -1,0 +1,28 @@
+@page "/"
+@inject ApiService Api
+@inject AuthService Auth
+@inject NavigationManager Nav
+
+<PageTitle>Дашборд сети</PageTitle>
+
+<h2>Дашборд сети</h2>
+
+@if (Stats is not null)
+{
+    <div class="stats-grid">
+        <StatCard Label="Пользователей" Value="@Stats.UsersCount.ToString()" />
+        <StatCard Label="Заказов" Value="@Stats.OrdersCount.ToString()" />
+        <StatCard Label="Клиентов" Value="@Stats.CustomersCount.ToString()" />
+        <StatCard Label="Выручка сети" Value="@Stats.TotalRevenue.ToString("N0")" Suffix=" TJS" />
+    </div>
+}
+
+@code {
+    private AdminNetworkStats? Stats;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Auth.CurrentUser is null) { Nav.NavigateTo("/login"); return; }
+        Stats = await Api.GetAsync<AdminNetworkStats>("admin/network-stats");
+    }
+}

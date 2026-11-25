@@ -1,0 +1,12 @@
+@inherits LayoutComponentBase
+@using AutoMaster.Admin.Shared
+
+<div class="admin-shell">
+    <NavMenu />
+    <div class="admin-content">
+        <AdminHeader />
+        <main>
+            @Body
+        </main>
+    </div>
+</div>

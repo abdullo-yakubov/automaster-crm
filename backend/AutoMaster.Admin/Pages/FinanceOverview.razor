@@ -1,0 +1,26 @@
+@page "/finance"
+@inject ApiService Api
+@inject AuthService Auth
+@inject NavigationManager Nav
+
+<h2>Финансы по сети</h2>
+
+@if (Stats is not null)
+{
+    <div class="stats-grid">
+        <StatCard Label="Выручка за месяц" Value="@Stats.RevenueThisMonth.ToString("N0")" Suffix=" TJS" />
+        <StatCard Label="Расходы за месяц" Value="@Stats.ExpensesThisMonth.ToString("N0")" Suffix=" TJS" />
+        <StatCard Label="Прибыль" Value="@Stats.Profit.ToString("N0")" Suffix=" TJS" />
+        <StatCard Label="Маржа" Value="@Stats.MarginPercent.ToString("N1")" Suffix="%" />
+    </div>
+}
+
+@code {
+    private FinanceStats? Stats;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Auth.CurrentUser is null) { Nav.NavigateTo("/login"); return; }
+        Stats = await Api.GetAsync<FinanceStats>("admin/finance-overview");
+    }
+}

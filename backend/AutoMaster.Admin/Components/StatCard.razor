@@ -1,0 +1,10 @@
+<div class="card stat-card">
+    <div class="label">@Label</div>
+    <div class="value">@Value@Suffix</div>
+</div>
+
+@code {
+    [Parameter] public string Label { get; set; } = "";
+    [Parameter] public string Value { get; set; } = "";
+    [Parameter] public string? Suffix { get; set; }
+}

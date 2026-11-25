@@ -1,0 +1,40 @@
+@page "/login"
+@layout EmptyLayout
+@inject AuthService Auth
+@inject NavigationManager Nav
+
+<div class="login-screen">
+    <form class="card login-card" @onsubmit="HandleSubmit">
+        <h2>AutoMaster — Супер-админ</h2>
+        <div class="field"><label>Email</label><input @bind="Email" /></div>
+        <div class="field"><label>Пароль</label><input type="password" @bind="Password" /></div>
+        @if (!string.IsNullOrEmpty(Error))
+        {
+            <div class="error-text">@Error</div>
+        }
+        <button class="btn" type="submit" disabled="@IsBusy">Войти</button>
+    </form>
+</div>
+
+@code {
+    private string Email = "admin@automaster.tj";
+    private string Password = "";
+    private string? Error;
+    private bool IsBusy;
+
+    private async Task HandleSubmit()
+    {
+        IsBusy = true;
+        Error = null;
+        var ok = await Auth.LoginAsync(Email, Password);
+        IsBusy = false;
+        if (ok)
+        {
+            Nav.NavigateTo("/");
+        }
+        else
+        {
+            Error = "Неверные данные или недостаточно прав (нужна роль Admin)";
+        }
+    }
+}

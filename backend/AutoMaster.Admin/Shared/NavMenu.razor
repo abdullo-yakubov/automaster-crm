@@ -1,0 +1,17 @@
+@using AutoMaster.Admin.Services
+@inject AuthService Auth
+
+<nav class="nav-menu">
+    <div class="brand">AutoMaster — Супер-админ</div>
+    @if (Auth.CurrentUser is not null)
+    {
+        <NavLink href="" Match="NavLinkMatch.All">Дашборд</NavLink>
+        <NavLink href="users">Пользователи</NavLink>
+        <NavLink href="orders">Все заказы</NavLink>
+        <NavLink href="customers">Все клиенты</NavLink>
+        <NavLink href="branches">Филиалы</NavLink>
+        <NavLink href="finance">Финансы сети</NavLink>
+        <NavLink href="logs">Системные логи</NavLink>
+        <NavLink href="settings">Настройки</NavLink>
+    }
+</nav>

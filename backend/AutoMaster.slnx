@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="AutoMaster.API/AutoMaster.API.csproj" />
+  <Project Path="AutoMaster.Application/AutoMaster.Application.csproj" />
+  <Project Path="AutoMaster.Domain/AutoMaster.Domain.csproj" />
+  <Project Path="AutoMaster.Infrastructure/AutoMaster.Infrastructure.csproj" />
+  <Project Path="AutoMaster.Admin/AutoMaster.Admin.csproj" />
+</Solution>
