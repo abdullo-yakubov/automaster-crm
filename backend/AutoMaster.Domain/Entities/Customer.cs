@@ -13,6 +13,8 @@ public class Customer
     public int LoyaltyPoints { get; set; }
     public decimal TotalSpent { get; set; }
     public string? Note { get; set; }
+    public Guid? UserId { get; set; }
+    public User? User { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 

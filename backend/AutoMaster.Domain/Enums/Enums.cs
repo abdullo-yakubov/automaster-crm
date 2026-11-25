@@ -90,3 +90,26 @@ public enum LoyaltyTransactionType
     Award,
     Redeem
 }
+
+public enum CampaignChannel
+{
+    Telegram,
+    WhatsApp,
+    Sms,
+    Email
+}
+
+public enum CustomerSegment
+{
+    All,
+    Vip,
+    Dormant,
+    AfterService
+}
+
+public enum CampaignStatus
+{
+    Queued,
+    Sent,
+    Failed
+}

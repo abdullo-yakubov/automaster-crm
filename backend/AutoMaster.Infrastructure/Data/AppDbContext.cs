@@ -23,6 +23,11 @@ public class AppDbContext : DbContext
     public DbSet<MysteryAudit> MysteryAudits => Set<MysteryAudit>();
     public DbSet<ChecklistItem> ChecklistItems => Set<ChecklistItem>();
     public DbSet<AppSettings> AppSettings => Set<AppSettings>();
+    public DbSet<ServiceBox> ServiceBoxes => Set<ServiceBox>();
+    public DbSet<PromoCode> PromoCodes => Set<PromoCode>();
+    public DbSet<MarketingCampaign> MarketingCampaigns => Set<MarketingCampaign>();
+    public DbSet<VoiceCommandLog> VoiceCommandLogs => Set<VoiceCommandLog>();
+    public DbSet<UserDashboard> UserDashboards => Set<UserDashboard>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -30,6 +35,7 @@ public class AppDbContext : DbContext
         {
             e.HasIndex(x => x.Email).IsUnique();
             e.Property(x => x.Role).HasConversion<string>().HasMaxLength(20);
+            e.HasIndex(x => x.RefreshToken);
         });
 
         modelBuilder.Entity<Customer>(e =>
@@ -37,6 +43,8 @@ public class AppDbContext : DbContext
             e.HasIndex(x => x.Phone).IsUnique();
             e.Property(x => x.Status).HasConversion<string>().HasMaxLength(20);
             e.Property(x => x.TotalSpent).HasPrecision(14, 2);
+            e.HasIndex(x => x.UserId).IsUnique().HasFilter("\"UserId\" IS NOT NULL");
+            e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.SetNull);
         });
 
         modelBuilder.Entity<Vehicle>(e =>
@@ -115,6 +123,44 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<ChecklistItem>(e =>
         {
             e.HasIndex(x => x.Type);
+        });
+
+        modelBuilder.Entity<ServiceBox>(e =>
+        {
+            e.Property(x => x.Name).HasMaxLength(50);
+            e.Property(x => x.Specialization).HasMaxLength(50);
+            e.HasIndex(x => x.CurrentOrderId).IsUnique().HasFilter("\"CurrentOrderId\" IS NOT NULL");
+            e.HasOne(x => x.CurrentOrder).WithMany().HasForeignKey(x => x.CurrentOrderId).OnDelete(DeleteBehavior.SetNull);
+        });
+
+        modelBuilder.Entity<PromoCode>(e =>
+        {
+            e.Property(x => x.Code).HasMaxLength(32);
+            e.HasIndex(x => x.Code).IsUnique();
+        });
+
+        modelBuilder.Entity<MarketingCampaign>(e =>
+        {
+            e.Property(x => x.Name).HasMaxLength(200);
+            e.Property(x => x.Message).HasMaxLength(1000);
+            e.Property(x => x.Channel).HasConversion<string>().HasMaxLength(20);
+            e.Property(x => x.Segment).HasConversion<string>().HasMaxLength(20);
+            e.Property(x => x.Status).HasConversion<string>().HasMaxLength(20);
+            e.HasIndex(x => x.CreatedAt);
+        });
+
+        modelBuilder.Entity<VoiceCommandLog>(e =>
+        {
+            e.Property(x => x.Transcript).HasMaxLength(500);
+            e.Property(x => x.Intent).HasMaxLength(50);
+            e.Property(x => x.Result).HasMaxLength(500);
+            e.HasIndex(x => new { x.UserId, x.CreatedAt });
+        });
+
+        modelBuilder.Entity<UserDashboard>(e =>
+        {
+            e.HasKey(x => x.UserId);
+            e.Property(x => x.Widgets).HasColumnType("text[]");
         });
     }
 }

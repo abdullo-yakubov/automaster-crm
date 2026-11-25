@@ -22,22 +22,39 @@ public class ExceptionMiddleware
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Unhandled exception");
+            // Бизнес-ошибки (бросает наш код) показываем пользователю. Те же типы исключений от
+            // EF Core / фреймворка — это внутренние ошибки: текст содержит SQL/LINQ и наружу не уходит.
+            var status = !IsThrownByApplication(ex)
+                ? HttpStatusCode.InternalServerError
+                : ex switch
+                {
+                    KeyNotFoundException => HttpStatusCode.NotFound,
+                    UnauthorizedAccessException => HttpStatusCode.Unauthorized,
+                    InvalidOperationException => HttpStatusCode.BadRequest,
+                    ArgumentException => HttpStatusCode.BadRequest,
+                    _ => HttpStatusCode.InternalServerError
+                };
 
-            var status = ex switch
-            {
-                KeyNotFoundException => HttpStatusCode.NotFound,
-                UnauthorizedAccessException => HttpStatusCode.Unauthorized,
-                InvalidOperationException => HttpStatusCode.BadRequest,
-                ArgumentException => HttpStatusCode.BadRequest,
-                _ => HttpStatusCode.InternalServerError
-            };
+            if (status == HttpStatusCode.InternalServerError)
+                _logger.LogError(ex, "Unhandled exception, traceId {TraceId}", context.TraceIdentifier);
+            else
+                _logger.LogWarning("{Status}: {Message}", (int)status, ex.Message);
 
+            if (context.Response.HasStarted) throw;
+
+            context.Response.Clear();
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int)status;
 
-            var response = JsonSerializer.Serialize(new { error = ex.Message });
-            await context.Response.WriteAsync(response);
+            // Детали внутренних ошибок (SQL, стек) наружу не отдаём.
+            var message = status == HttpStatusCode.InternalServerError
+                ? "Внутренняя ошибка сервера"
+                : ex.Message;
+
+            await context.Response.WriteAsync(JsonSerializer.Serialize(new { error = message, traceId = context.TraceIdentifier }));
         }
     }
+
+    private static bool IsThrownByApplication(Exception ex) =>
+        ex.TargetSite?.DeclaringType?.Namespace?.StartsWith("AutoMaster", StringComparison.Ordinal) == true;
 }
