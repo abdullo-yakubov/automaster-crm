@@ -4,4 +4,5 @@
   <Project Path="AutoMaster.Domain/AutoMaster.Domain.csproj" />
   <Project Path="AutoMaster.Infrastructure/AutoMaster.Infrastructure.csproj" />
   <Project Path="AutoMaster.Admin/AutoMaster.Admin.csproj" />
+  <Project Path="AutoMaster.Tests/AutoMaster.Tests.csproj" />
 </Solution>

@@ -13,14 +13,19 @@ public class AdminController : ControllerBase
     private readonly IOrderService _orderService;
     private readonly ICustomerService _customerService;
     private readonly IFinanceService _financeService;
+    private readonly IWebHostEnvironment _environment;
+    private readonly IConfiguration _configuration;
 
     public AdminController(IAdminService adminService, IOrderService orderService,
-        ICustomerService customerService, IFinanceService financeService)
+        ICustomerService customerService, IFinanceService financeService,
+        IWebHostEnvironment environment, IConfiguration configuration)
     {
         _adminService = adminService;
         _orderService = orderService;
         _customerService = customerService;
         _financeService = financeService;
+        _environment = environment;
+        _configuration = configuration;
     }
 
     [HttpGet("api/admin/users")]
@@ -41,6 +46,9 @@ public class AdminController : ControllerBase
     [HttpPost("api/admin/reset-demo")]
     public async Task<IActionResult> ResetDemo()
     {
+        if (!_environment.IsDevelopment() || !_configuration.GetValue<bool>("Seed:AllowDemoReset"))
+            return NotFound();
+
         await _adminService.ResetDemoDataAsync();
         return NoContent();
     }

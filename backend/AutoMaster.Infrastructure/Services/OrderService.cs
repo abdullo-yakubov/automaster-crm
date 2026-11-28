@@ -137,10 +137,11 @@ public class OrderService : IOrderService
             ?? throw new KeyNotFoundException("Заказ не найден");
 
         var newStatus = Enum.Parse<OrderStatus>(request.Status, true);
+        var wasCompleted = order.CompletedAt is not null;
         order.Status = newStatus;
         order.UpdatedAt = DateTime.UtcNow;
 
-        if (newStatus == OrderStatus.Completed)
+        if (newStatus == OrderStatus.Completed && !wasCompleted)
         {
             order.CompletedAt = DateTime.UtcNow;
             ApplyLoyaltyAndSpend(order.Customer!, order.TotalCost);

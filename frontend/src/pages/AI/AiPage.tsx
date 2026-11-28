@@ -11,7 +11,7 @@ const URGENCY_BORDER = { high: 'var(--red)', medium: 'var(--yellow)', low: 'var(
 export function AiPage() {
   return (
     <div>
-      <PageHeader title="AI МЕХАНИК" sub="Диагностика по симптомам, прогноз ТО, статистика поломок" />
+      <PageHeader title="ПОМОЩНИК ДИАГНОСТИКИ" sub="Подсказки по правилам симптомов, прогноз ТО и статистика поломок. Не заменяет осмотр механика." />
       <div className="grid-2">
         <Diagnosis />
       </div>
@@ -62,7 +62,7 @@ function Diagnosis() {
           <label className="form-label">Пробег (км)</label>
           <input type="number" min={0} value={mileage} onChange={(e) => setMileage(e.target.value)} placeholder="Подставится из карточки авто" />
         </div>
-        <button className="btn btn-primary w-full" disabled={busy}>{busy ? 'Анализ…' : '🤖 Запустить диагностику'}</button>
+        <button className="btn btn-primary w-full" disabled={busy}>{busy ? 'Анализ…' : 'Показать возможные причины'}</button>
       </form>
 
       <div className="card">

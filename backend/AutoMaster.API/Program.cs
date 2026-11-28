@@ -158,7 +158,7 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    await DbSeeder.SeedAsync(db, seedDemoData: app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("Seed:DemoData"));
+    await DbSeeder.SeedAsync(db, seedDemoData: app.Environment.IsDevelopment() && app.Configuration.GetValue<bool>("Seed:DemoData"));
 }
 
 app.UseMiddleware<ExceptionMiddleware>();
